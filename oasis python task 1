@@ -1,0 +1,78 @@
+import speech_recognition as sr
+import pyttsx3
+import datetime
+import webbrowser
+
+# Initialize the recognizer and the text-to-speech engine
+recognizer = sr.Recognizer()
+tts_engine = pyttsx3.init()
+
+# Function to convert text to speech
+def speak(text):
+    tts_engine.say(text)
+    tts_engine.runAndWait()
+
+# Function to recognize speech and return text
+def listen():
+    with sr.Microphone() as source:
+        print("Listening...")
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+        try:
+            print("Recognizing...")
+            command = recognizer.recognize_google(audio)
+            print(f"User said: {command}\n")
+        except sr.UnknownValueError:
+            print("Sorry, I did not understand that.")
+            command = ""
+        except sr.RequestError:
+            print("Sorry, my speech service is down.")
+            command = ""
+    return command.lower()
+
+# Function to respond to greetings
+def respond_to_greeting():
+    speak("Hello! How can I assist you today?")
+
+# Function to tell the current time
+def tell_time():
+    now = datetime.datetime.now()
+    time_str = now.strftime("%H:%M:%S")
+    speak(f"The current time is {time_str}")
+
+# Function to tell the current date
+def tell_date():
+    today = datetime.datetime.now().date()
+    speak(f"Today's date is {today}")
+
+# Function to search the web
+def search_web(query):
+    speak(f"Searching the web for {query}")
+    webbrowser.open(f"https://www.google.com/search?q={query}")
+
+# Main function to run the assistant
+def run_assistant():
+    while True:
+        command = listen()
+        if 'hello' in command:
+            respond_to_greeting()
+        elif 'time' in command:
+            tell_time()
+        elif 'date' in command:
+            tell_date()
+        elif 'search' in command:
+            query = command.replace('search', '').strip()
+            if query:
+                search_web(query)
+            else:
+                speak("Please provide a search query.")
+        elif 'exit' in command or 'quit' in command:
+            speak("Goodbye!")
+            break
+        else:
+            speak("Sorry, I didn't catch that. Please try again.")
+
+# Start the assistant
+if __name__ == "__main__":
+    speak("Voice assistant is starting...")
+    run_assistant()
